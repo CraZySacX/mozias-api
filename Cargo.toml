@@ -1,7 +1,21 @@
 [package]
-name = "mozias-api"
-version = "0.1.0"
-authors = ["Jason Ozias <jason.ozias@gmail.com>"]
+authors = ["Jason Ozias <jason.g.ozias@gmail.com>"]
+description = "mozias REST API"
+documentation = "http://docs.rs/mozias-api"
 edition = "2018"
+homepage = "http://rustyhorde.github.io/mozias-api"
+keywords = ["mozias", "rest", "api"]
+license = "MIT/Apache-2.0"
+name = "mozias-api"
+readme = "README.md"
+repository = "https://github.com/CraZysacX/mozias-api"
+version = "0.1.0"
 
 [dependencies]
+clap = "2"
+getset = "0"
+lazy_static = "1"
+rocket = "0"
+rocket_contrib = "0"
+serde = "1"
+serde_derive = "1"
