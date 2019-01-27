@@ -10,7 +10,8 @@
 //!
 //! ```
 //! ```
-use crate::error::DataqResult;
+use crate::db;
+use crate::error::MoziasApiResult;
 use rocket::{get, routes};
 use rocket_contrib::json::Json;
 use rocket_contrib::serve::StaticFiles;
@@ -31,8 +32,9 @@ fn auth() -> &'static str {
     "ok"
 }
 
-crate fn run() -> DataqResult<()> {
+crate fn run() -> MoziasApiResult<()> {
     Err(rocket::ignite()
+        .manage(db::init_pool()?)
         .mount("/", StaticFiles::from("static"))
         .mount("/api/v1", routes![healthcheck, auth])
         .launch()

@@ -14,18 +14,18 @@ use std::error::Error;
 use std::fmt;
 
 /// A result that includes a `mussh::Error`
-crate type DataqResult<T> = Result<T, DataqErr>;
+crate type MoziasApiResult<T> = Result<T, MoziasApiErr>;
 
 /// An error thrown by the mussh library
 #[derive(Debug)]
-crate struct DataqErr {
+crate struct MoziasApiErr {
     /// The kind of error
-    inner: DataqErrKind,
+    inner: MoziasApiErrKind,
 }
 
-impl Error for DataqErr {
+impl Error for MoziasApiErr {
     fn description(&self) -> &str {
-        "DataQ Error"
+        "MoziasApi Error"
     }
 
     fn source(&self) -> Option<&(dyn Error + 'static)> {
@@ -33,7 +33,7 @@ impl Error for DataqErr {
     }
 }
 
-impl fmt::Display for DataqErr {
+impl fmt::Display for MoziasApiErr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.description())?;
 
@@ -46,7 +46,7 @@ impl fmt::Display for DataqErr {
 
 macro_rules! external_error {
     ($error:ty, $kind:expr) => {
-        impl From<$error> for DataqErr {
+        impl From<$error> for MoziasApiErr {
             fn from(inner: $error) -> Self {
                 Self {
                     inner: $kind(inner),
@@ -56,54 +56,64 @@ macro_rules! external_error {
     };
 }
 
-impl From<DataqErrKind> for DataqErr {
-    fn from(inner: DataqErrKind) -> Self {
+impl From<MoziasApiErrKind> for MoziasApiErr {
+    fn from(inner: MoziasApiErrKind) -> Self {
         Self { inner }
     }
 }
 
-impl From<&str> for DataqErr {
+impl From<&str> for MoziasApiErr {
     fn from(inner: &str) -> Self {
         Self {
-            inner: DataqErrKind::Str(inner.to_string()),
+            inner: MoziasApiErrKind::Str(inner.to_string()),
         }
     }
 }
 
-external_error!(clap::Error, DataqErrKind::Clap);
-external_error!(std::io::Error, DataqErrKind::Io);
-external_error!(String, DataqErrKind::Str);
-external_error!(rocket::error::LaunchError, DataqErrKind::Launch);
+external_error!(clap::Error, MoziasApiErrKind::Clap);
+external_error!(std::io::Error, MoziasApiErrKind::Io);
+external_error!(rocket::error::LaunchError, MoziasApiErrKind::Launch);
+external_error!(mysql::Error, MoziasApiErrKind::Mysql);
+external_error!(String, MoziasApiErrKind::Str);
+external_error!(std::env::VarError, MoziasApiErrKind::Var);
 
 #[derive(Debug)]
-crate enum DataqErrKind {
+#[allow(clippy::large_enum_variant)]
+#[allow(variant_size_differences)]
+crate enum MoziasApiErrKind {
     Clap(clap::Error),
     Io(std::io::Error),
     Launch(rocket::error::LaunchError),
+    Mysql(mysql::Error),
     Str(String),
+    Var(std::env::VarError),
 }
 
-impl Error for DataqErrKind {
+impl Error for MoziasApiErrKind {
     fn description(&self) -> &str {
         match self {
-            DataqErrKind::Clap(inner) => inner.description(),
-            DataqErrKind::Io(inner) => inner.description(),
-            DataqErrKind::Launch(inner) => inner.description(),
-            DataqErrKind::Str(inner) => &inner[..],
+            MoziasApiErrKind::Clap(inner) => inner.description(),
+            MoziasApiErrKind::Io(inner) => inner.description(),
+            MoziasApiErrKind::Launch(inner) => inner.description(),
+            MoziasApiErrKind::Mysql(inner) => inner.description(),
+            MoziasApiErrKind::Str(inner) => &inner[..],
+            MoziasApiErrKind::Var(inner) => inner.description(),
         }
     }
 
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            DataqErrKind::Clap(inner) => inner.source(),
-            DataqErrKind::Io(inner) => inner.source(),
-            DataqErrKind::Launch(inner) => inner.source(),
+            MoziasApiErrKind::Clap(inner) => inner.source(),
+            MoziasApiErrKind::Io(inner) => inner.source(),
+            MoziasApiErrKind::Launch(inner) => inner.source(),
+            MoziasApiErrKind::Mysql(inner) => inner.source(),
+            MoziasApiErrKind::Var(inner) => inner.source(),
             _ => None,
         }
     }
 }
 
-impl fmt::Display for DataqErrKind {
+impl fmt::Display for MoziasApiErrKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.description())
     }

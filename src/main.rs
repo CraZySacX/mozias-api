@@ -48,6 +48,7 @@ use std::error::Error;
 use std::process;
 
 mod cors;
+mod db;
 mod error;
 mod run;
 
