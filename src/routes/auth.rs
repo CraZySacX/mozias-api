@@ -10,20 +10,19 @@
 //!
 //! ```
 //! ```
-use crate::error::MoziasApiResult;
+use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use crate::model::auth::Credentials;
+use argonautica::Verifier;
 use mysql::{from_row, Pool};
 use rocket::{post, State};
 use rocket_contrib::json::Json;
+use std::env;
 
 #[post("/auth", data = "<auth>", format = "application/json")]
 #[allow(clippy::needless_pass_by_value)]
-crate fn auth(
-    pool: State<'_, Pool>,
-    auth: Json<Credentials>,
-) -> MoziasApiResult<Json<&'static str>> {
+crate fn auth(pool: State<'_, Pool>, auth: Json<Credentials>) -> MoziasApiResult<Json<bool>> {
     let username = auth.username();
-    let _password = auth.password();
+    let password = auth.password();
 
     println!("Got auth request for '{}'", username);
     let pass_vec: Vec<String> = pool
@@ -41,8 +40,15 @@ crate fn auth(
         })
         .collect();
 
-    for _password in pass_vec {
-        println!("Found password for user '{}'", username);
+    if pass_vec.len() == 1 {
+        let mut verifier = Verifier::default();
+        let is_valid = verifier
+            .with_hash(&pass_vec[0])
+            .with_password(password)
+            .with_secret_key(env::var("ARGON2_SECRET_KEY")?)
+            .verify()?;
+        Ok(Json(is_valid))
+    } else {
+        Err(MoziasApiErrKind::Unauthorized.into())
     }
-    Ok(Json("ok"))
 }

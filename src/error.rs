@@ -10,8 +10,12 @@
 //!
 //! ```
 //! ```
+use rocket::http::{ContentType, Status};
+use rocket::request::Request;
+use rocket::response::{self, Responder, Response};
 use std::error::Error;
 use std::fmt;
+use std::io::Cursor;
 
 /// A result that includes a `mussh::Error`
 crate type MoziasApiResult<T> = Result<T, MoziasApiErr>;
@@ -44,6 +48,21 @@ impl fmt::Display for MoziasApiErr {
     }
 }
 
+impl<'r> Responder<'r> for MoziasApiErr {
+    fn respond_to(self, _: &Request<'_>) -> response::Result<'r> {
+        let status = match self.inner {
+            MoziasApiErrKind::Unauthorized => Status::Unauthorized,
+            _ => Status::InternalServerError,
+        };
+
+        Response::build()
+            .status(status)
+            .sized_body(Cursor::new(format!("{{\"message\": \"{}\"}}", "Error")))
+            .header(ContentType::JSON)
+            .ok()
+    }
+}
+
 macro_rules! external_error {
     ($error:ty, $kind:expr) => {
         impl From<$error> for MoziasApiErr {
@@ -70,6 +89,7 @@ impl From<&str> for MoziasApiErr {
     }
 }
 
+external_error!(argonautica::Error, MoziasApiErrKind::Argonautica);
 external_error!(clap::Error, MoziasApiErrKind::Clap);
 external_error!(std::io::Error, MoziasApiErrKind::Io);
 external_error!(rocket::error::LaunchError, MoziasApiErrKind::Launch);
@@ -81,22 +101,26 @@ external_error!(std::env::VarError, MoziasApiErrKind::Var);
 #[allow(clippy::large_enum_variant)]
 #[allow(variant_size_differences)]
 crate enum MoziasApiErrKind {
+    Argonautica(argonautica::Error),
     Clap(clap::Error),
     Io(std::io::Error),
     Launch(rocket::error::LaunchError),
     Mysql(mysql::Error),
     Str(String),
+    Unauthorized,
     Var(std::env::VarError),
 }
 
 impl Error for MoziasApiErrKind {
     fn description(&self) -> &str {
         match self {
+            MoziasApiErrKind::Argonautica(_inner) => "argonautica error",
             MoziasApiErrKind::Clap(inner) => inner.description(),
             MoziasApiErrKind::Io(inner) => inner.description(),
             MoziasApiErrKind::Launch(inner) => inner.description(),
             MoziasApiErrKind::Mysql(inner) => inner.description(),
             MoziasApiErrKind::Str(inner) => &inner[..],
+            MoziasApiErrKind::Unauthorized => "unauthorized",
             MoziasApiErrKind::Var(inner) => inner.description(),
         }
     }
@@ -115,6 +139,9 @@ impl Error for MoziasApiErrKind {
 
 impl fmt::Display for MoziasApiErrKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.description())
+        match self {
+            MoziasApiErrKind::Argonautica(inner) => write!(f, "{}", inner.kind()),
+            _ => write!(f, "{}", self.description()),
+        }
     }
 }
