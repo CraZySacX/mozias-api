@@ -18,7 +18,10 @@ use rocket_contrib::json::Json;
 
 #[post("/auth", data = "<auth>", format = "application/json")]
 #[allow(clippy::needless_pass_by_value)]
-crate fn auth(pool: State<'_, Pool>, auth: Json<Credentials>) -> MoziasApiResult<&'static str> {
+crate fn auth(
+    pool: State<'_, Pool>,
+    auth: Json<Credentials>,
+) -> MoziasApiResult<Json<&'static str>> {
     let username = auth.username();
     let _password = auth.password();
 
@@ -41,5 +44,5 @@ crate fn auth(pool: State<'_, Pool>, auth: Json<Credentials>) -> MoziasApiResult
     for _password in pass_vec {
         println!("Found password for user '{}'", username);
     }
-    Ok("ok")
+    Ok(Json("ok"))
 }
