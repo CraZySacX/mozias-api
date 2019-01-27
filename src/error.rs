@@ -89,7 +89,7 @@ impl From<&str> for MoziasApiErr {
     }
 }
 
-external_error!(argonautica::Error, MoziasApiErrKind::Argonautica);
+external_error!(argon2::Error, MoziasApiErrKind::Argon2);
 external_error!(clap::Error, MoziasApiErrKind::Clap);
 external_error!(std::io::Error, MoziasApiErrKind::Io);
 external_error!(rocket::error::LaunchError, MoziasApiErrKind::Launch);
@@ -101,7 +101,7 @@ external_error!(std::env::VarError, MoziasApiErrKind::Var);
 #[allow(clippy::large_enum_variant)]
 #[allow(variant_size_differences)]
 crate enum MoziasApiErrKind {
-    Argonautica(argonautica::Error),
+    Argon2(argon2::Error),
     Clap(clap::Error),
     Io(std::io::Error),
     Launch(rocket::error::LaunchError),
@@ -114,7 +114,7 @@ crate enum MoziasApiErrKind {
 impl Error for MoziasApiErrKind {
     fn description(&self) -> &str {
         match self {
-            MoziasApiErrKind::Argonautica(_inner) => "argonautica error",
+            MoziasApiErrKind::Argon2(inner) => inner.description(),
             MoziasApiErrKind::Clap(inner) => inner.description(),
             MoziasApiErrKind::Io(inner) => inner.description(),
             MoziasApiErrKind::Launch(inner) => inner.description(),
@@ -127,6 +127,7 @@ impl Error for MoziasApiErrKind {
 
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
+            MoziasApiErrKind::Argon2(inner) => inner.source(),
             MoziasApiErrKind::Clap(inner) => inner.source(),
             MoziasApiErrKind::Io(inner) => inner.source(),
             MoziasApiErrKind::Launch(inner) => inner.source(),
@@ -139,9 +140,6 @@ impl Error for MoziasApiErrKind {
 
 impl fmt::Display for MoziasApiErrKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            MoziasApiErrKind::Argonautica(inner) => write!(f, "{}", inner.kind()),
-            _ => write!(f, "{}", self.description()),
-        }
+        write!(f, "{}", self.description())
     }
 }

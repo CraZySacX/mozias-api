@@ -12,7 +12,6 @@
 //! ```
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use crate::model::auth::Credentials;
-use argonautica::Verifier;
 use mysql::{from_row, Pool};
 use rocket::{post, State};
 use rocket_contrib::json::Json;
@@ -41,12 +40,10 @@ crate fn auth(pool: State<'_, Pool>, auth: Json<Credentials>) -> MoziasApiResult
         .collect();
 
     if pass_vec.len() == 1 {
-        let mut verifier = Verifier::default();
-        let is_valid = verifier
-            .with_hash(&pass_vec[0])
-            .with_password(password)
-            .with_secret_key(env::var("ARGON2_SECRET_KEY")?)
-            .verify()?;
+        let secret_key = env::var("ARGON2_SECRET_KEY")?;
+        let secret_bytes = secret_key.as_bytes();
+        let is_valid =
+            argon2::verify_encoded_ext(&pass_vec[0], password.as_bytes(), secret_bytes, &[])?;
         Ok(Json(is_valid))
     } else {
         Err(MoziasApiErrKind::Unauthorized.into())
