@@ -22,6 +22,5 @@ crate fn init_pool() -> MoziasApiResult<Pool> {
     let _ = opts.user(Some(env::var("MOZIASDB_USERNAME")?));
     let _ = opts.pass(Some(env::var("MOZIASDB_PASSWORD")?));
 
-    let pool = Pool::new(opts)?;
-    Ok(pool)
+    Ok(Pool::new(opts)?)
 }
