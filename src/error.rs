@@ -10,15 +10,25 @@
 //!
 //! ```
 //! ```
+use getset::Setters;
 use rocket::http::{ContentType, Status};
 use rocket::request::Request;
 use rocket::response::{self, Responder, Response};
+use serde_derive::{Deserialize, Serialize};
+use serde_json::json;
 use std::error::Error;
 use std::fmt;
 use std::io::Cursor;
 
 /// A result that includes a `mussh::Error`
 crate type MoziasApiResult<T> = Result<T, MoziasApiErr>;
+
+/// An error response
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Setters)]
+crate struct ErrorResponse {
+    #[set = "pub"]
+    message: String,
+}
 
 /// An error thrown by the mussh library
 #[derive(Debug)]
@@ -55,9 +65,13 @@ impl<'r> Responder<'r> for MoziasApiErr {
             _ => Status::InternalServerError,
         };
 
+        let mut err_response = ErrorResponse::default();
+        let _ = err_response.set_message(self.description().to_string());
+        let err_json = json!(err_response);
+
         Response::build()
             .status(status)
-            .sized_body(Cursor::new(format!("{{\"message\": \"{}\"}}", "Error")))
+            .sized_body(Cursor::new(err_json.to_string()))
             .header(ContentType::JSON)
             .ok()
     }
