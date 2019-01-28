@@ -10,7 +10,7 @@
 //!
 //! ```
 //! ```
-use getset::Getters;
+use getset::{Getters, Setters};
 use serde_derive::{Deserialize, Serialize};
 
 /// Authentication struct
@@ -22,4 +22,10 @@ crate struct Credentials {
     /// User password
     #[get = "pub"]
     password: String,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize, Setters)]
+crate struct TokenResponse {
+    #[set = "pub"]
+    refresh_token: String,
 }
