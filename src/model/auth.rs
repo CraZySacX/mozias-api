@@ -10,8 +10,111 @@
 //!
 //! ```
 //! ```
+use chrono::{NaiveDateTime, Utc};
 use getset::{Getters, Setters};
+use lazy_static::lazy_static;
 use serde_derive::{Deserialize, Serialize};
+
+const SECONDS_PER_30_MINUTES: i64 = 30 * 60;
+
+lazy_static! {
+    #[derive(Copy, Clone, Debug)]
+    pub static ref ISSUER: String = {
+        format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+    };
+    #[derive(Copy, Clone, Debug)]
+    pub static ref URL_ENC_ISSUER: String = {
+        format!("{}%20{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+    };
+}
+
+/// User
+#[derive(Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize, Setters)]
+crate struct User {
+    #[get = "pub"]
+    #[set = "pub"]
+    id: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    username: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    password: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    name: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    disabled: bool,
+    #[get = "pub"]
+    #[set = "pub"]
+    created_by: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    created_date: NaiveDateTime,
+    #[get = "pub"]
+    #[set = "pub"]
+    last_modified_by: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    last_modified_date: NaiveDateTime,
+}
+
+impl Default for User {
+    fn default() -> Self {
+        Self {
+            id: String::new(),
+            username: String::new(),
+            password: String::new(),
+            name: String::new(),
+            disabled: false,
+            created_by: String::new(),
+            created_date: NaiveDateTime::from_timestamp(Utc::now().timestamp(), 0),
+            last_modified_by: String::new(),
+            last_modified_date: NaiveDateTime::from_timestamp(Utc::now().timestamp(), 0),
+        }
+    }
+}
+
+/// User
+#[derive(Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize, Setters)]
+crate struct UserProfile {
+    #[get = "pub"]
+    #[set = "pub"]
+    id: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    user_id: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    refresh_token: Option<String>,
+    #[get = "pub"]
+    #[set = "pub"]
+    created_by: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    created_date: NaiveDateTime,
+    #[get = "pub"]
+    #[set = "pub"]
+    last_modified_by: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    last_modified_date: NaiveDateTime,
+}
+
+impl Default for UserProfile {
+    fn default() -> Self {
+        Self {
+            id: String::new(),
+            user_id: String::new(),
+            refresh_token: None,
+            created_by: String::new(),
+            created_date: NaiveDateTime::from_timestamp(Utc::now().timestamp(), 0),
+            last_modified_by: String::new(),
+            last_modified_date: NaiveDateTime::from_timestamp(Utc::now().timestamp(), 0),
+        }
+    }
+}
 
 /// Authentication struct
 #[derive(Clone, Debug, Deserialize, Eq, Getters, PartialEq, Serialize)]
@@ -28,4 +131,44 @@ crate struct Credentials {
 crate struct TokenResponse {
     #[set = "pub"]
     refresh_token: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Getters, Serialize, Setters)]
+crate struct Claims {
+    #[set = "pub"]
+    iss: String,
+    #[get = "pub"]
+    #[set = "pub"]
+    sub: String,
+    iat: i64,
+    nbf: i64,
+    exp: i64,
+    // Atlas User ID
+    #[set = "pub"]
+    aid: String,
+    // Is Two-Factor Authentication required?
+    #[set = "pub"]
+    tfa: bool,
+    // // Atlas User Roles
+    // #[get = "pub"]
+    // #[set = "pub"]
+    // rol: Vec<Role>,
+}
+
+impl Default for Claims {
+    fn default() -> Self {
+        let now = Utc::now().timestamp();
+        // Set expiration 30 minutes from now.
+        let exp = now + SECONDS_PER_30_MINUTES;
+        Self {
+            iss: String::new(),
+            sub: String::new(),
+            iat: now,
+            nbf: now,
+            exp: exp,
+            aid: String::new(),
+            tfa: false,
+            // rol: Vec::new(),
+        }
+    }
 }

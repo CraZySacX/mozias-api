@@ -106,6 +106,7 @@ impl From<&str> for MoziasApiErr {
 external_error!(argon2::Error, MoziasApiErrKind::Argon2);
 external_error!(clap::Error, MoziasApiErrKind::Clap);
 external_error!(std::io::Error, MoziasApiErrKind::Io);
+external_error!(jsonwebtoken::errors::Error, MoziasApiErrKind::JsonWebToken);
 external_error!(rocket::error::LaunchError, MoziasApiErrKind::Launch);
 external_error!(mysql::Error, MoziasApiErrKind::Mysql);
 external_error!(String, MoziasApiErrKind::Str);
@@ -118,6 +119,7 @@ crate enum MoziasApiErrKind {
     Argon2(argon2::Error),
     Clap(clap::Error),
     Io(std::io::Error),
+    JsonWebToken(jsonwebtoken::errors::Error),
     Launch(rocket::error::LaunchError),
     Mysql(mysql::Error),
     Str(String),
@@ -131,6 +133,7 @@ impl Error for MoziasApiErrKind {
             MoziasApiErrKind::Argon2(inner) => inner.description(),
             MoziasApiErrKind::Clap(inner) => inner.description(),
             MoziasApiErrKind::Io(inner) => inner.description(),
+            MoziasApiErrKind::JsonWebToken(inner) => inner.description(),
             MoziasApiErrKind::Launch(inner) => inner.description(),
             MoziasApiErrKind::Mysql(inner) => inner.description(),
             MoziasApiErrKind::Str(inner) => &inner[..],

@@ -14,6 +14,8 @@ use crate::error::MoziasApiResult;
 use mysql::{OptsBuilder, Pool};
 use std::env;
 
+crate mod auth;
+
 /// initialize the database pool
 crate fn init_pool() -> MoziasApiResult<Pool> {
     let mut opts = OptsBuilder::new();
