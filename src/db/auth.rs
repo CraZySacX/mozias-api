@@ -16,7 +16,7 @@ use mysql::{from_row_opt, Pool, Row};
 
 lazy_static! {
     static ref USER_AUTH_QUERY: &'static str = r#"
-SELECT id, password, refresh_token
+SELECT user.id, password, refresh_token
 FROM mozias_user as user
 LEFT JOIN mozias_user_profile as profile on user.id = profile.user_id
 WHERE user.username = ?"#;

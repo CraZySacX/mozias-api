@@ -66,7 +66,7 @@ impl<'r> Responder<'r> for MoziasApiErr {
         };
 
         let mut err_response = ErrorResponse::default();
-        let _ = err_response.set_message(self.description().to_string());
+        let _ = err_response.set_message(self.inner.description().to_string());
         let err_json = json!(err_response);
 
         Response::build()
