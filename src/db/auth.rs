@@ -21,10 +21,8 @@ FROM mozias_user as user
 LEFT JOIN mozias_user_profile as profile on user.id = profile.user_id
 WHERE user.username = :username"#;
     static ref INSERT_REFRESH_TOKEN: &'static str = r#"
-INSERT INTO mozias_user_profile
-  (refresh_token)
-VALUES
-  (:refresh_token)
+UPDATE mozias_user_profile
+SET refresh_token = :refresh_token
 WHERE id = :profile_id"#;
 }
 
