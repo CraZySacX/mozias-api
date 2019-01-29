@@ -28,9 +28,9 @@ VALUES
 WHERE id = :profile_id"#;
 }
 
-fn result_filter(
-    result: Result<Row, mysql::Error>,
-) -> Option<(String, String, String, Option<String>)> {
+type AuthQueryResult = (String, String, String, Option<String>);
+
+fn result_filter(result: Result<Row, mysql::Error>) -> Option<AuthQueryResult> {
     if let Ok(row) = result {
         if let Ok((id, profile_id, password, refresh_token)) = from_row_opt(row) {
             Some((id, profile_id, password, refresh_token))
@@ -45,7 +45,7 @@ fn result_filter(
 crate fn auth_info_by_username(
     pool: &Pool,
     username: &str,
-) -> MoziasApiResult<Vec<(String, String, String, Option<String>)>> {
+) -> MoziasApiResult<Vec<AuthQueryResult>> {
     Ok(pool
         .prep_exec(*USER_AUTH_QUERY, params! {"username" => &username})?
         .filter_map(result_filter)
@@ -57,7 +57,7 @@ crate fn add_refresh_token_to_profile(
     profile_id: &str,
     refresh_token: &str,
 ) -> MoziasApiResult<()> {
-    for mut stmt in pool.prepare(*INSERT_REFRESH_TOKEN) {
+    if let Ok(mut stmt) = pool.prepare(*INSERT_REFRESH_TOKEN) {
         let result = stmt.execute(params! {
             "refresh_token" => refresh_token,
             "profile_id" => profile_id,
