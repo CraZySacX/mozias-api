@@ -220,7 +220,7 @@ version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cfg-if 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "crossbeam-channel 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
+ "crossbeam-channel 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-deque 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-epoch 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-utils 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -231,7 +231,7 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "crossbeam-utils 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -723,7 +723,7 @@ dependencies = [
  "smallvec 0.6.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)",
  "twox-hash 1.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "uuid 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "uuid 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -945,8 +945,8 @@ dependencies = [
  "rand_core 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand_hc 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand_isaac 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand_jitter 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand_os 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand_jitter 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand_os 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand_pcg 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand_xorshift 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -992,7 +992,7 @@ dependencies = [
 
 [[package]]
 name = "rand_jitter"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "libc 0.2.48 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1002,13 +1002,13 @@ dependencies = [
 
 [[package]]
 name = "rand_os"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "cloudabi 0.0.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "fuchsia-zircon 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fuchsia-cprng 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.48 (registry+https://github.com/rust-lang/crates.io-index)",
- "rand_core 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand_core 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rdrand 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -1458,7 +1458,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "uuid"
-version = "0.7.1"
+version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -1573,7 +1573,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum crc 1.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d663548de7f5cca343f1e0a48d14dcfb0e9eb4e079ec58883b7251539fa10aeb"
 "checksum crc32fast 1.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "e91d5240c6975ef33aeb5f148f35275c25eda8e8a5f95abe421978b05b8bf192"
 "checksum crossbeam 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d1c92ff2d7a202d592f5a412d75cf421495c913817781c1cb383bf12a77e185f"
-"checksum crossbeam-channel 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)" = "8d4f5844607ce8da3fff431e7dba56cda8bfcc570aa50bee36adba8a32b8cad7"
+"checksum crossbeam-channel 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)" = "0f0ed1a4de2235cabda8558ff5840bffb97fcb64c97827f354a451307df5f72b"
 "checksum crossbeam-deque 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)" = "05e44b8cf3e1a625844d1750e1f7820da46044ff6d28f4d43e455ba3e5bb2c13"
 "checksum crossbeam-epoch 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)" = "2449aaa4ec7ef96e5fb24db16024b935df718e9ae1cec0a1e68feeca2efca7b8"
 "checksum crossbeam-epoch 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)" = "04c9e3102cc2d69cd681412141b390abd55a362afc1540965dad0ad4d34280b4"
@@ -1653,8 +1653,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum rand_core 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d0e7a549d590831370895ab7ba4ea0c1b6b011d106b5ff2da6eee112615e6dc0"
 "checksum rand_hc 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7b40677c7be09ae76218dc623efbf7b18e34bced3f38883af07bb75630a21bc4"
 "checksum rand_isaac 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "ded997c9d5f13925be2a6fd7e66bf1872597f759fd9dd93513dd7e92e5a5ee08"
-"checksum rand_jitter 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f47842851e13bd803b506bdd1345328e0a1394733ee58e627b5e39332b9afafe"
-"checksum rand_os 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "f46fbd5550acf75b0c2730f5dd1873751daf9beb8f11b44027778fae50d7feca"
+"checksum rand_jitter 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "29fe7b8bc348249f3b1bbb9ab8baa6fa3419196ecfbf213408bca1b2494710de"
+"checksum rand_os 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "b7c690732391ae0abafced5015ffb53656abfaec61b342290e5eb56b286a679d"
 "checksum rand_pcg 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "086bd09a33c7044e56bb44d5bdde5a60e7f119a9e95b0775f545de759a32fe05"
 "checksum rand_xorshift 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cbf7e9e623549b0e21f6e97cf8ecf247c1a8fd2e8a992ae265314300b2455d5c"
 "checksum rdrand 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "678054eb77286b51581ba43620cc911abf02758c91f93f479767aed0f90458b2"
@@ -1709,7 +1709,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum untrusted 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "55cd1f4b4e96b46aeb8d4855db4a7a9bd96eeeb5c6a1ab54593328761642ce2f"
 "checksum url 1.7.2 (registry+https://github.com/rust-lang/crates.io-index)" = "dd4e7c0d531266369519a4aa4f399d748bd37043b00bde1e4ff1f60a120b355a"
 "checksum utf8-ranges 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "796f7e48bef87609f7ade7e06495a87d5cd06c7866e6a5cbfceffc558a243737"
-"checksum uuid 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)" = "dab5c5526c5caa3d106653401a267fed923e7046f35895ffcb5ca42db64942e6"
+"checksum uuid 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)" = "0238db0c5b605dd1cf51de0f21766f97fba2645897024461d6a00c036819a768"
 "checksum vec_map 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)" = "05c78687fb1a80548ae3250346c3db86a80a7cdd77bda190189f2d0a0987c81a"
 "checksum version_check 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "914b1a6776c4c929a602fafd8bc742e06365d4bcbe48c30f9cca5824f70dc9dd"
 "checksum void 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
