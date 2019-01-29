@@ -57,11 +57,17 @@ crate fn add_refresh_token_to_profile(
     profile_id: &str,
     refresh_token: &str,
 ) -> MoziasApiResult<()> {
+    println!(
+        "Inserting '{}' into profile '{}'",
+        refresh_token, profile_id
+    );
     if let Ok(mut stmt) = pool.prepare(*INSERT_REFRESH_TOKEN) {
         let result = stmt.execute(params! {
             "refresh_token" => refresh_token,
             "profile_id" => profile_id,
         })?;
+
+        println!("Result: {}", result.affected_rows());
 
         if result.affected_rows() != 1 {
             return Err(MoziasApiErrKind::InsertFailed.into());
