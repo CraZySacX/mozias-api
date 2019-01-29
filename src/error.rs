@@ -118,6 +118,7 @@ external_error!(std::env::VarError, MoziasApiErrKind::Var);
 crate enum MoziasApiErrKind {
     Argon2(argon2::Error),
     Clap(clap::Error),
+    InsertFailed,
     Io(std::io::Error),
     JsonWebToken(jsonwebtoken::errors::Error),
     Launch(rocket::error::LaunchError),
@@ -132,6 +133,7 @@ impl Error for MoziasApiErrKind {
         match self {
             MoziasApiErrKind::Argon2(inner) => inner.description(),
             MoziasApiErrKind::Clap(inner) => inner.description(),
+            MoziasApiErrKind::InsertFailed => "insert failed",
             MoziasApiErrKind::Io(inner) => inner.description(),
             MoziasApiErrKind::JsonWebToken(inner) => inner.description(),
             MoziasApiErrKind::Launch(inner) => inner.description(),

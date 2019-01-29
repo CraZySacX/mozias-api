@@ -10,22 +10,30 @@
 //!
 //! ```
 //! ```
-use crate::error::MoziasApiResult;
+use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use lazy_static::lazy_static;
-use mysql::{from_row_opt, Pool, Row};
+use mysql::{from_row_opt, params, Pool, Row};
 
 lazy_static! {
     static ref USER_AUTH_QUERY: &'static str = r#"
-SELECT user.id, password, refresh_token
+SELECT user.id, profile.id as profile_id, password, refresh_token
 FROM mozias_user as user
 LEFT JOIN mozias_user_profile as profile on user.id = profile.user_id
-WHERE user.username = ?"#;
+WHERE user.username = :username"#;
+    static ref INSERT_REFRESH_TOKEN: &'static str = r#"
+INSERT INTO mozias_user_profile
+  (refresh_token)
+VALUES
+  (:refresh_token)
+WHERE id = :profile_id"#;
 }
 
-fn result_filter(result: Result<Row, mysql::Error>) -> Option<(String, String, Option<String>)> {
+fn result_filter(
+    result: Result<Row, mysql::Error>,
+) -> Option<(String, String, String, Option<String>)> {
     if let Ok(row) = result {
-        if let Ok((id, password, refresh_token)) = from_row_opt(row) {
-            Some((id, password, refresh_token))
+        if let Ok((id, profile_id, password, refresh_token)) = from_row_opt(row) {
+            Some((id, profile_id, password, refresh_token))
         } else {
             None
         }
@@ -37,9 +45,27 @@ fn result_filter(result: Result<Row, mysql::Error>) -> Option<(String, String, O
 crate fn auth_info_by_username(
     pool: &Pool,
     username: &str,
-) -> MoziasApiResult<Vec<(String, String, Option<String>)>> {
+) -> MoziasApiResult<Vec<(String, String, String, Option<String>)>> {
     Ok(pool
-        .prep_exec(*USER_AUTH_QUERY, (&username,))?
+        .prep_exec(*USER_AUTH_QUERY, params! {"username" => &username})?
         .filter_map(result_filter)
         .collect())
+}
+
+crate fn add_refresh_token_to_profile(
+    pool: &Pool,
+    profile_id: &str,
+    refresh_token: &str,
+) -> MoziasApiResult<()> {
+    for mut stmt in pool.prepare(*INSERT_REFRESH_TOKEN) {
+        let result = stmt.execute(params! {
+            "refresh_token" => refresh_token,
+            "profile_id" => profile_id,
+        })?;
+
+        if result.affected_rows() != 1 {
+            return Err(MoziasApiErrKind::InsertFailed.into());
+        }
+    }
+    Ok(())
 }

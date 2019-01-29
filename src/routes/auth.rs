@@ -12,7 +12,8 @@
 //! ```
 use crate::db::auth as db;
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
-use crate::model::auth::{Claims, Credentials, TokenResponse, ISSUER};
+use crate::model::auth::{Claims, Credentials, TokenResponse, ISSUER, SECONDS_PER_YEAR};
+use chrono::Utc;
 use jsonwebtoken::{Algorithm, Header};
 use mysql::Pool;
 use rocket::{post, State};
@@ -35,20 +36,24 @@ crate fn auth(
         let secret_key = env::var("ARGON2_SECRET_KEY")?;
         let secret_bytes = secret_key.as_bytes();
         let id = &user_vec[0].0;
-        let password = &user_vec[0].1;
-        let refresh_tok_opt = &user_vec[0].2;
+        let profile_id = &user_vec[0].1;
+        let password = &user_vec[0].2;
+        let refresh_tok_opt = &user_vec[0].3;
 
         if argon2::verify_encoded_ext(password, given_password.as_bytes(), secret_bytes, &[])? {
             let mut token_response = TokenResponse::default();
             let _ = token_response.set_refresh_token(if let Some(refresh_tok) = refresh_tok_opt {
                 refresh_tok.clone()
             } else {
+                println!("Creating new refresh token for user '{}'", username);
                 // create a new refresh token and store it
+                let now = Utc::now().timestamp();
                 let mut claims = Claims::default();
                 let _ = claims.set_iss(ISSUER.to_string());
                 let _ = claims.set_sub(username.clone());
                 let _ = claims.set_aid(id.clone());
                 let _ = claims.set_tfa(false);
+                let _ = claims.set_exp(now + SECONDS_PER_YEAR);
                 // if let Ok(roles) = role::find_roles_by_user_id(&pool, id) {
                 //     claims.set_rol(roles);
                 // }
@@ -56,7 +61,11 @@ crate fn auth(
                 let mut header = Header::default();
                 header.alg = Algorithm::HS512;
                 let secret = env::var("JWT_SECRET")?;
-                jsonwebtoken::encode(&header, &claims, secret.as_bytes())?
+                let token = jsonwebtoken::encode(&header, &claims, secret.as_bytes())?;
+
+                println!("Storing refresh token in user profile");
+                db::add_refresh_token_to_profile(&*pool, &profile_id, &token)?;
+                token
             });
             Ok(Json(token_response))
         } else {

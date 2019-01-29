@@ -15,7 +15,10 @@ use getset::{Getters, Setters};
 use lazy_static::lazy_static;
 use serde_derive::{Deserialize, Serialize};
 
-const SECONDS_PER_30_MINUTES: i64 = 30 * 60;
+crate const SECONDS_PER_MINUTE: i64 = 60;
+crate const SECONDS_PER_HOUR: i64 = SECONDS_PER_MINUTE * 60;
+crate const SECONDS_PER_DAY: i64 = SECONDS_PER_HOUR * 24;
+crate const SECONDS_PER_YEAR: i64 = SECONDS_PER_DAY * 365;
 
 lazy_static! {
     #[derive(Copy, Clone, Debug)]
@@ -142,6 +145,7 @@ crate struct Claims {
     sub: String,
     iat: i64,
     nbf: i64,
+    #[set = "pub"]
     exp: i64,
     // Atlas User ID
     #[set = "pub"]
@@ -158,8 +162,8 @@ crate struct Claims {
 impl Default for Claims {
     fn default() -> Self {
         let now = Utc::now().timestamp();
-        // Set expiration 30 minutes from now.
-        let exp = now + SECONDS_PER_30_MINUTES;
+        // Set expiration 5 minutes from now.
+        let exp = now + SECONDS_PER_MINUTE * 5;
         Self {
             iss: String::new(),
             sub: String::new(),
