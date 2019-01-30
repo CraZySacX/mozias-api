@@ -10,9 +10,10 @@
 //!
 //! ```
 //! ```
-use crate::error::MoziasApiResult;
+use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use lazy_static::lazy_static;
-use mysql::{OptsBuilder, Pool};
+use mysql::prelude::FromValue;
+use mysql::{from_row_opt, OptsBuilder, Pool, Row};
 use std::env;
 
 crate mod auth;
@@ -29,6 +30,7 @@ lazy_static! {
 
         Ok(Pool::new(opts)?)
     };
+    static ref LAST_INSERT_ID: &'static str = r#"SELECT LAST_INSERT_ID()"#;
 }
 
 crate fn get_pool() -> MoziasApiResult<Pool> {
@@ -36,4 +38,30 @@ crate fn get_pool() -> MoziasApiResult<Pool> {
         Ok(pool) => Ok(pool.clone()),
         Err(_e) => Err("cannot get pool".into()),
     }
+}
+
+fn result_filter<T>(result: Result<Row, mysql::Error>) -> Option<T>
+where
+    T: FromValue,
+{
+    if let Ok(row) = result {
+        if let Ok(typ) = from_row_opt::<T>(row) {
+            Some(typ)
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+crate fn last_insert_id() -> MoziasApiResult<u64> {
+    println!("Getting Last Inserted ID");
+    let pool = get_pool()?;
+    Ok(*pool
+        .prep_exec(*LAST_INSERT_ID, ())?
+        .filter_map(result_filter)
+        .collect::<Vec<u64>>()
+        .first()
+        .ok_or_else(|| MoziasApiErrKind::NoInsertId)?)
 }

@@ -18,9 +18,9 @@ use mysql::params;
 lazy_static! {
     static ref INSERT_TELEMETRY: &'static str = r#"
 INSERT INTO mozias_telemetry
-  (UUID, METHOD, URI, ELAPSED)
+  (UUID, METHOD, URI, REMOTE, REAL_IP, ELAPSED)
 VALUES
-  (:uuid, :method, :uri, :elapsed)
+  (:uuid, :method, :uri, :remote, :real_ip, :elapsed)
 "#;
 }
 
@@ -28,6 +28,8 @@ crate fn insert_telemetry(
     uuid: &str,
     method: &str,
     uri: &str,
+    remote: &Option<String>,
+    real_ip: &Option<String>,
     elapsed: u64,
 ) -> MoziasApiResult<()> {
     println!("Inserting telemetry data");
@@ -39,6 +41,8 @@ crate fn insert_telemetry(
                 "uuid" => uuid,
                 "method" => method,
                 "uri" => uri,
+                "remote" => remote,
+                "real_ip" => real_ip,
                 "elapsed" => elapsed,
             })?;
 

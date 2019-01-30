@@ -22,22 +22,12 @@ const MOZIAS_UUID_HEADER: &str = "x-request-id";
 #[derive(Clone, Default)]
 crate struct Telemetry {
     start: Option<Instant>,
-    uuid: Option<Uuid>,
 }
 
 impl Telemetry {
     fn request(&self, req: &mut Request<'_>, _: &Data) -> MoziasApiResult<()> {
-        // let uuid = Uuid::new_v4();
-        let uuid_header = req
-            .headers()
-            .get_one(MOZIAS_UUID_HEADER)
-            .ok_or_else(|| MoziasApiErrKind::Header)?;
-        let uuid = Uuid::parse_str(uuid_header)?;
         let now = Instant::now();
-        let _ = req.local_cache(|| Self {
-            start: Some(now),
-            uuid: Some(uuid),
-        });
+        let _ = req.local_cache(|| Self { start: Some(now) });
         Ok(())
     }
 
@@ -48,12 +38,14 @@ impl Telemetry {
             .ok_or_else(|| MoziasApiErrKind::Header)?;
         let uuid = Uuid::parse_str(uuid_header)?;
         let uuid_str = uuid.to_hyphenated().to_string();
+
+        // Pull data off request
         let method = req.method().to_string();
         let uri = req.uri().path();
-        let telemetry = req.local_cache(|| Self {
-            start: None,
-            uuid: None,
-        });
+        let remote = req.remote().map(|r| r.to_string());
+        let real_ip = req.real_ip().map(|r| r.to_string());
+
+        let telemetry = req.local_cache(|| Self { start: None });
 
         let elapsed = if let Some(duration) = telemetry.start.map(|st| st.elapsed()) {
             duration.as_secs() * 1000 + u64::from(duration.subsec_millis())
@@ -61,7 +53,8 @@ impl Telemetry {
             0
         };
 
-        db::telemetry::insert_telemetry(&uuid_str, &method, &uri, elapsed)?;
+        db::telemetry::insert_telemetry(&uuid_str, &method, &uri, &remote, &real_ip, elapsed)?;
+        let _last_insert_id = db::last_insert_id()?;
 
         Ok(())
     }
