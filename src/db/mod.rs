@@ -13,7 +13,7 @@
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use lazy_static::lazy_static;
 use mysql::prelude::FromValue;
-use mysql::{from_row_opt, OptsBuilder, Pool, Row};
+use mysql::{from_row_opt, OptsBuilder, Pool, Row, Transaction};
 use std::env;
 
 crate mod auth;
@@ -37,6 +37,13 @@ crate fn get_pool() -> MoziasApiResult<Pool> {
     match &(*POOL) {
         Ok(pool) => Ok(pool.clone()),
         Err(_e) => Err("cannot get pool".into()),
+    }
+}
+
+crate fn start_txn<'a>() -> MoziasApiResult<Transaction<'a>> {
+    match &(*POOL) {
+        Ok(pool) => Ok(pool.start_transaction(false, None, None)?),
+        Err(_e) => Err("cannot start txn".into()),
     }
 }
 

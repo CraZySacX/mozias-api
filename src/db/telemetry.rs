@@ -10,10 +10,11 @@
 //!
 //! ```
 //! ```
-use crate::db;
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use lazy_static::lazy_static;
 use mysql::params;
+use mysql::prelude::GenericConnection;
+use rocket::http::Header;
 
 lazy_static! {
     static ref INSERT_TELEMETRY: &'static str = r#"
@@ -22,20 +23,26 @@ INSERT INTO mozias_telemetry
 VALUES
   (:uuid, :method, :uri, :remote, :real_ip, :elapsed)
 "#;
+    static ref INSERT_HEADERS: &'static str = r#"
+INSERT INTO mozias_telemetry_headers
+  (TELEMETRY_ID, KEY, VALUE)
+VALUES
+  (:telemetry_id, :key, :value)"#;
 }
 
-crate fn insert_telemetry(
+crate fn insert_telemetry<T>(
+    conn: &mut T,
     uuid: &str,
     method: &str,
     uri: &str,
     remote: &Option<String>,
     real_ip: &Option<String>,
     elapsed: u64,
-) -> MoziasApiResult<()> {
-    println!("Inserting telemetry data");
-    let pool = db::get_pool()?;
-
-    match pool.prepare(*INSERT_TELEMETRY) {
+) -> MoziasApiResult<()>
+where
+    T: GenericConnection,
+{
+    match conn.prepare(*INSERT_TELEMETRY) {
         Ok(mut stmt) => {
             let result = stmt.execute(params! {
                 "uuid" => uuid,
@@ -50,6 +57,36 @@ crate fn insert_telemetry(
 
             if result.affected_rows() != 1 {
                 return Err(MoziasApiErrKind::InsertFailed.into());
+            }
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("{}", e);
+            Err(e.into())
+        }
+    }
+}
+
+crate fn insert_headers<T>(
+    conn: &mut T,
+    last_insert_id: u64,
+    headers: &[Header<'_>],
+) -> MoziasApiResult<()>
+where
+    T: GenericConnection,
+{
+    match conn.prepare(*INSERT_HEADERS) {
+        Ok(mut stmt) => {
+            for header in headers {
+                let result = stmt.execute(params! {
+                    "telemetry_id" => last_insert_id,
+                    "key" => header.name(),
+                    "value" => header.value(),
+                })?;
+
+                if result.affected_rows() != 1 {
+                    return Err(MoziasApiErrKind::InsertFailed.into());
+                }
             }
             Ok(())
         }

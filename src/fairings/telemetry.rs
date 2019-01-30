@@ -13,6 +13,7 @@
 use crate::db;
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use rocket::fairing::{Fairing, Info, Kind};
+use rocket::http::Header;
 use rocket::{Data, Request, Response};
 use std::time::Instant;
 use uuid::Uuid;
@@ -44,6 +45,7 @@ impl Telemetry {
         let uri = req.uri().path();
         let remote = req.remote().map(|r| r.to_string());
         let real_ip = req.real_ip().map(|r| r.to_string());
+        let headers: Vec<Header<'_>> = req.headers().iter().map(|h| h).collect();
 
         let telemetry = req.local_cache(|| Self { start: None });
 
@@ -53,8 +55,13 @@ impl Telemetry {
             0
         };
 
-        db::telemetry::insert_telemetry(&uuid_str, &method, &uri, &remote, &real_ip, elapsed)?;
-        let _last_insert_id = db::last_insert_id()?;
+        let mut txn = db::start_txn()?;
+        db::telemetry::insert_telemetry(
+            &mut txn, &uuid_str, &method, &uri, &remote, &real_ip, elapsed,
+        )?;
+        let last_insert_id = db::last_insert_id()?;
+        db::telemetry::insert_headers(&mut txn, last_insert_id, &headers)?;
+        txn.commit()?;
 
         Ok(())
     }
