@@ -49,9 +49,9 @@ impl Error for MoziasApiErr {
 
 impl fmt::Display for MoziasApiErr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.description())?;
+        write!(f, "{}", self.inner.description())?;
 
-        if let Some(source) = self.source() {
+        if let Some(source) = self.inner.source() {
             write!(f, ": {}", source)?;
         }
         write!(f, "")
