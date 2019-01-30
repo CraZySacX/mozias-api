@@ -25,7 +25,7 @@ VALUES
 "#;
     static ref INSERT_HEADERS: &'static str = r#"
 INSERT INTO mozias_telemetry_headers
-  (TELEMETRY_ID, KEY, VALUE)
+  (`telemetry_id`, `key`, `value`)
 VALUES
   (:telemetry_id, :key, :value)"#;
 }
