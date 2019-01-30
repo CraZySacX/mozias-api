@@ -16,10 +16,9 @@ clap = "2"
 getset = "0"
 jsonwebtoken = "5"
 lazy_static = "1"
-mysql = "15"
+mysql = "14"
 rocket = "0"
 rocket_codegen = "0"
-rocket_contrib = "0"
 rust-argon2 = "0"
 serde = "1"
 serde_derive = "1"
@@ -28,6 +27,11 @@ serde_json = "1"
 [dependencies.chrono]
 features = ["serde"]
 version = "0"
+
+[dependencies.rocket_contrib]
+version = "0.4.0"
+default-features = false
+features = ["json", "serve"]
 
 [dependencies.uuid]
 features = ["v4"]

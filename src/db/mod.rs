@@ -25,6 +25,7 @@ lazy_static! {
         let _ = opts.db_name(Some(env::var("MOZIASDB_DB")?));
         let _ = opts.user(Some(env::var("MOZIASDB_USERNAME")?));
         let _ = opts.pass(Some(env::var("MOZIASDB_PASSWORD")?));
+        let _ = opts.tcp_keepalive_time_ms(Some(1000));
 
         Ok(Pool::new(opts)?)
     };
