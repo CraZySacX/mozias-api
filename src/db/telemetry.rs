@@ -20,7 +20,7 @@ lazy_static! {
 INSERT INTO mozias_telemetry
   (UUID, METHOD, URI, ELAPSED)
 VALUES
-  (:uuid, :method, uri, elapsed)
+  (:uuid, :method, :uri, :elapsed)
 "#;
 }
 
