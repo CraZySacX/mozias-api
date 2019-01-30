@@ -16,6 +16,7 @@ use mysql::{OptsBuilder, Pool};
 use std::env;
 
 crate mod auth;
+crate mod telemetry;
 
 lazy_static! {
     static ref POOL: MoziasApiResult<Pool> = {

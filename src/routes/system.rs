@@ -15,6 +15,6 @@ use rocket::get;
 use rocket_contrib::json::Json;
 
 #[get("/healthcheck")]
-crate fn healthcheck<'a>() -> Json<Health<'a>> {
+crate fn healthcheck() -> Json<Health> {
     Json(Health::default())
 }

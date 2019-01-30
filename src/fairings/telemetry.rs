@@ -19,7 +19,6 @@ use std::time::Instant;
 use uuid::Uuid;
 
 const MOZIAS_UUID_HEADER: &str = "x-mozias-uuid";
-const MOZIAS_RESPONSE_TIME_HEADER: &str = "x-mozias-response-time";
 
 #[derive(Clone, Default)]
 crate struct Telemetry {
@@ -40,27 +39,37 @@ impl Telemetry {
         Ok(())
     }
 
-    fn response(&self, req: &Request<'_>, res: &mut Response<'_>) -> MoziasApiResult<()> {
-        let _pool = db::get_pool();
+    fn response(&self, req: &Request<'_>, _: &mut Response<'_>) -> MoziasApiResult<()> {
         let uuid_header = req
             .headers()
             .get_one(MOZIAS_UUID_HEADER)
             .ok_or_else(|| MoziasApiErrKind::Header)?;
+        let method = req.method().to_string();
+        let uri = req.uri().to_string();
         let header_uuid = Uuid::parse_str(uuid_header)?;
         let telemetry = req.local_cache(|| Self {
             start: None,
             uuid: None,
         });
 
-        if let Some(uuid) = telemetry.uuid.map(|u| u) {
+        let uuid = if let Some(uuid) = telemetry.uuid.map(|u| u) {
             if header_uuid == uuid {
-                println!("UUIDs match!!");
+                uuid.to_hyphenated().to_string()
+            } else {
+                "unknown".to_string()
             }
-        }
-        if let Some(duration) = telemetry.start.map(|st| st.elapsed()) {
-            let ms = duration.as_secs() * 1000 + u64::from(duration.subsec_millis());
-            let _ = res.set_raw_header(MOZIAS_RESPONSE_TIME_HEADER, format!("{} ms", ms));
-        }
+        } else {
+            "unknown".to_string()
+        };
+
+        let elapsed = if let Some(duration) = telemetry.start.map(|st| st.elapsed()) {
+            duration.as_secs() * 1000 + u64::from(duration.subsec_millis())
+        } else {
+            0
+        };
+
+        db::telemetry::insert_telemetry(&uuid, &method, &uri, elapsed)?;
+
         Ok(())
     }
 }

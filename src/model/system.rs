@@ -13,14 +13,16 @@
 use getset::Setters;
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Setters)]
-crate struct Health<'a> {
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Setters)]
+crate struct Health {
     #[set = "pub"]
-    status: &'a str,
+    status: String,
 }
 
-impl Default for Health<'_> {
+impl Default for Health {
     fn default() -> Self {
-        Self { status: "ok" }
+        Self {
+            status: "ok".to_string(),
+        }
     }
 }
