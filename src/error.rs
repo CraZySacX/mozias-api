@@ -167,6 +167,16 @@ impl Error for MoziasApiErrKind {
 
 impl fmt::Display for MoziasApiErrKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.description())
+        write!(f, "{}", self.description())?;
+        match self {
+            MoziasApiErrKind::Argon2(inner) => write!(f, ": {}", inner),
+            MoziasApiErrKind::Clap(inner) => write!(f, ": {}", inner),
+            MoziasApiErrKind::Io(inner) => write!(f, ": {}", inner),
+            MoziasApiErrKind::Launch(inner) => write!(f, ": {}", inner),
+            MoziasApiErrKind::Mysql(inner) => write!(f, ": {}", inner),
+            MoziasApiErrKind::UuidParse(inner) => write!(f, ": {}", inner),
+            MoziasApiErrKind::Var(inner) => write!(f, ": {}", inner),
+            _ => write!(f, ""),
+        }
     }
 }
