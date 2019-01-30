@@ -56,10 +56,9 @@ impl Telemetry {
         };
 
         let mut txn = db::start_txn()?;
-        db::telemetry::insert_telemetry(
+        let last_insert_id = db::telemetry::insert_telemetry(
             &mut txn, &uuid_str, &method, &uri, &remote, &real_ip, elapsed,
         )?;
-        let last_insert_id = db::last_insert_id()?;
         match db::telemetry::insert_headers(&mut txn, last_insert_id, &headers) {
             Ok(_) => {
                 println!("Committing Transaction");

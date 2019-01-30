@@ -38,7 +38,7 @@ crate fn insert_telemetry<T>(
     remote: &Option<String>,
     real_ip: &Option<String>,
     elapsed: u64,
-) -> MoziasApiResult<()>
+) -> MoziasApiResult<u64>
 where
     T: GenericConnection,
 {
@@ -58,7 +58,7 @@ where
             if result.affected_rows() != 1 {
                 return Err(MoziasApiErrKind::InsertFailed.into());
             }
-            Ok(())
+            Ok(result.last_insert_id())
         }
         Err(e) => {
             eprintln!("{}", e);

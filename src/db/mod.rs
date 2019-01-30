@@ -12,7 +12,7 @@
 //! ```
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use lazy_static::lazy_static;
-use mysql::prelude::FromValue;
+use mysql::prelude::FromRow;
 use mysql::{from_row_opt, OptsBuilder, Pool, Row, Transaction};
 use std::env;
 
@@ -47,9 +47,9 @@ crate fn start_txn<'a>() -> MoziasApiResult<Transaction<'a>> {
     }
 }
 
-fn result_filter<T>(result: Result<Row, mysql::Error>) -> Option<T>
+crate fn result_filter<T>(result: Result<Row, mysql::Error>) -> Option<T>
 where
-    T: FromValue,
+    T: FromRow,
 {
     if let Ok(row) = result {
         if let Ok(typ) = from_row_opt::<T>(row) {
@@ -62,6 +62,7 @@ where
     }
 }
 
+#[allow(dead_code)]
 crate fn last_insert_id() -> MoziasApiResult<u64> {
     println!("Getting Last Inserted ID");
     let pool = get_pool()?;

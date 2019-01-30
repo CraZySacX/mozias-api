@@ -10,9 +10,10 @@
 //!
 //! ```
 //! ```
+use crate::db::result_filter;
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use lazy_static::lazy_static;
-use mysql::{from_row_opt, params, Pool, Row};
+use mysql::{params, Pool};
 
 lazy_static! {
     static ref USER_AUTH_QUERY: &'static str = r#"
@@ -27,18 +28,6 @@ WHERE id = :profile_id"#;
 }
 
 type AuthQueryResult = (String, String, String, Option<String>);
-
-fn result_filter(result: Result<Row, mysql::Error>) -> Option<AuthQueryResult> {
-    if let Ok(row) = result {
-        if let Ok((id, profile_id, password, refresh_token)) = from_row_opt(row) {
-            Some((id, profile_id, password, refresh_token))
-        } else {
-            None
-        }
-    } else {
-        None
-    }
-}
 
 crate fn auth_info_by_username(
     pool: &Pool,
