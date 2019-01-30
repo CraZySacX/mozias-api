@@ -20,7 +20,7 @@ use uuid::Uuid;
 const MOZIAS_UUID_HEADER: &str = "x-mozias-uuid";
 const MOZIAS_RESPONSE_TIME_HEADER: &str = "x-mozias-response-time";
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 crate struct Telemetry {
     start: Option<Instant>,
     uuid: Option<Uuid>,

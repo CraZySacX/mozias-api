@@ -12,6 +12,7 @@
 //! ```
 use crate::db;
 use crate::error::MoziasApiResult;
+use crate::fairings::telemetry::Telemetry;
 use crate::routes::{auth, system};
 use rocket::routes;
 use rocket_contrib::serve::StaticFiles;
@@ -19,6 +20,7 @@ use rocket_contrib::serve::StaticFiles;
 crate fn run() -> MoziasApiResult<()> {
     Err(rocket::ignite()
         .manage(db::init_pool()?)
+        .attach(Telemetry::default())
         .mount("/", StaticFiles::from("static"))
         .mount("/api/v1", routes![system::healthcheck, auth::auth])
         .launch()
