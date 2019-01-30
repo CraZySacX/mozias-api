@@ -10,6 +10,7 @@
 //!
 //! ```
 //! ```
+use crate::db;
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::Header;
@@ -20,7 +21,7 @@ use uuid::Uuid;
 const MOZIAS_UUID_HEADER: &str = "x-mozias-uuid";
 const MOZIAS_RESPONSE_TIME_HEADER: &str = "x-mozias-response-time";
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Default)]
 crate struct Telemetry {
     start: Option<Instant>,
     uuid: Option<Uuid>,
@@ -40,6 +41,7 @@ impl Telemetry {
     }
 
     fn response(&self, req: &Request<'_>, res: &mut Response<'_>) -> MoziasApiResult<()> {
+        let _pool = db::get_pool();
         let uuid_header = req
             .headers()
             .get_one(MOZIAS_UUID_HEADER)

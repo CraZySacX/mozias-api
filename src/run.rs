@@ -18,8 +18,9 @@ use rocket::routes;
 use rocket_contrib::serve::StaticFiles;
 
 crate fn run() -> MoziasApiResult<()> {
+    let pool = db::get_pool()?.clone();
     Err(rocket::ignite()
-        .manage(db::init_pool()?)
+        .manage(pool)
         .attach(Telemetry::default())
         .mount("/", StaticFiles::from("static"))
         .mount("/api/v1", routes![system::healthcheck, auth::auth])

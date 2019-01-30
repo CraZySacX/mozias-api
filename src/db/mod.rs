@@ -11,18 +11,27 @@
 //! ```
 //! ```
 use crate::error::MoziasApiResult;
+use lazy_static::lazy_static;
 use mysql::{OptsBuilder, Pool};
 use std::env;
 
 crate mod auth;
 
-/// initialize the database pool
-crate fn init_pool() -> MoziasApiResult<Pool> {
-    let mut opts = OptsBuilder::new();
-    let _ = opts.ip_or_hostname(Some(env::var("MOZIASDB_HOST")?));
-    let _ = opts.db_name(Some(env::var("MOZIASDB_DB")?));
-    let _ = opts.user(Some(env::var("MOZIASDB_USERNAME")?));
-    let _ = opts.pass(Some(env::var("MOZIASDB_PASSWORD")?));
+lazy_static! {
+    static ref POOL: MoziasApiResult<Pool> = {
+        let mut opts = OptsBuilder::new();
+        let _ = opts.ip_or_hostname(Some(env::var("MOZIASDB_HOST")?));
+        let _ = opts.db_name(Some(env::var("MOZIASDB_DB")?));
+        let _ = opts.user(Some(env::var("MOZIASDB_USERNAME")?));
+        let _ = opts.pass(Some(env::var("MOZIASDB_PASSWORD")?));
 
-    Ok(Pool::new(opts)?)
+        Ok(Pool::new(opts)?)
+    };
+}
+
+crate fn get_pool() -> MoziasApiResult<Pool> {
+    match &(*POOL) {
+        Ok(pool) => Ok(pool.clone()),
+        Err(_e) => Err("cannot get pool".into()),
+    }
 }
