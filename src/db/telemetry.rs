@@ -78,7 +78,12 @@ where
     match conn.prepare(*INSERT_HEADERS) {
         Ok(mut stmt) => {
             for header in headers {
-                println!("Inserting header into mozias_telemetry_headers");
+                println!(
+                    "Inserting header into mozias_telemetry_headers: {} -> {} => {}",
+                    last_insert_id,
+                    header.name(),
+                    header.value()
+                );
                 let result = stmt.execute(params! {
                     "telemetry_id" => last_insert_id,
                     "key" => header.name(),
