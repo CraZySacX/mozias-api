@@ -50,6 +50,7 @@ use std::process;
 mod cors;
 mod db;
 mod error;
+mod fairings;
 mod model;
 mod routes;
 mod run;

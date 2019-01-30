@@ -110,6 +110,7 @@ external_error!(jsonwebtoken::errors::Error, MoziasApiErrKind::JsonWebToken);
 external_error!(rocket::error::LaunchError, MoziasApiErrKind::Launch);
 external_error!(mysql::Error, MoziasApiErrKind::Mysql);
 external_error!(String, MoziasApiErrKind::Str);
+external_error!(uuid::parser::ParseError, MoziasApiErrKind::UuidParse);
 external_error!(std::env::VarError, MoziasApiErrKind::Var);
 
 #[derive(Debug)]
@@ -118,6 +119,7 @@ external_error!(std::env::VarError, MoziasApiErrKind::Var);
 crate enum MoziasApiErrKind {
     Argon2(argon2::Error),
     Clap(clap::Error),
+    Header,
     InsertFailed,
     Io(std::io::Error),
     JsonWebToken(jsonwebtoken::errors::Error),
@@ -125,6 +127,7 @@ crate enum MoziasApiErrKind {
     Mysql(mysql::Error),
     Str(String),
     Unauthorized,
+    UuidParse(uuid::parser::ParseError),
     Var(std::env::VarError),
 }
 
@@ -133,6 +136,7 @@ impl Error for MoziasApiErrKind {
         match self {
             MoziasApiErrKind::Argon2(inner) => inner.description(),
             MoziasApiErrKind::Clap(inner) => inner.description(),
+            MoziasApiErrKind::Header => "invalid header",
             MoziasApiErrKind::InsertFailed => "insert failed",
             MoziasApiErrKind::Io(inner) => inner.description(),
             MoziasApiErrKind::JsonWebToken(inner) => inner.description(),
@@ -140,6 +144,7 @@ impl Error for MoziasApiErrKind {
             MoziasApiErrKind::Mysql(inner) => inner.description(),
             MoziasApiErrKind::Str(inner) => &inner[..],
             MoziasApiErrKind::Unauthorized => "unauthorized",
+            MoziasApiErrKind::UuidParse(inner) => inner.description(),
             MoziasApiErrKind::Var(inner) => inner.description(),
         }
     }
@@ -151,6 +156,7 @@ impl Error for MoziasApiErrKind {
             MoziasApiErrKind::Io(inner) => inner.source(),
             MoziasApiErrKind::Launch(inner) => inner.source(),
             MoziasApiErrKind::Mysql(inner) => inner.source(),
+            MoziasApiErrKind::UuidParse(inner) => inner.source(),
             MoziasApiErrKind::Var(inner) => inner.source(),
             _ => None,
         }
