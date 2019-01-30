@@ -54,7 +54,7 @@ impl fmt::Display for MoziasApiErr {
         if let Some(source) = self.inner.source() {
             write!(f, ": {}", source)?;
         }
-        write!(f, "")
+        write!(f, ": {}", self.inner)
     }
 }
 
