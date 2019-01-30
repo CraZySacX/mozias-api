@@ -36,12 +36,10 @@ impl Fairing for Cors {
     }
 
     fn on_response(&self, request: &Request<'_>, response: &mut Response<'_>) {
-        println!("Path: {}", request.uri().path().to_string());
         if self
             .request_uris
             .contains(&request.uri().path().to_string())
         {
-            println!("WE HAVE A MATCH");
             let _ = response.set_header(Header::new(
                 "Access-Control-Allow-Origin",
                 "http://localhost",

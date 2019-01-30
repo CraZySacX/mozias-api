@@ -53,8 +53,6 @@ where
                 "elapsed" => elapsed,
             })?;
 
-            println!("Result: {}", result.affected_rows());
-
             if result.affected_rows() != 1 {
                 return Err(MoziasApiErrKind::InsertFailed.into());
             }
@@ -78,22 +76,15 @@ where
     match conn.prepare(*INSERT_HEADERS) {
         Ok(mut stmt) => {
             for header in headers {
-                println!(
-                    "Inserting header into mozias_telemetry_headers: {} -> {} => {}",
-                    last_insert_id,
-                    header.name(),
-                    header.value()
-                );
                 let result = stmt.execute(params! {
                     "telemetry_id" => last_insert_id,
                     "key" => header.name(),
                     "value" => header.value(),
                 })?;
 
-                println!("Affected Rows: {}", result.affected_rows());
-                // if result.affected_rows() != 1 {
-                //     return Err(MoziasApiErrKind::InsertFailed.into());
-                // }
+                if result.affected_rows() != 1 {
+                    return Err(MoziasApiErrKind::InsertFailed.into());
+                }
             }
             Ok(())
         }

@@ -61,7 +61,6 @@ impl Telemetry {
         )?;
         match db::telemetry::insert_headers(&mut txn, last_insert_id, &headers) {
             Ok(_) => {
-                println!("Committing Transaction");
                 txn.commit()?;
             }
             Err(e) => {

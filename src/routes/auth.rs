@@ -28,8 +28,6 @@ crate fn auth(
 ) -> MoziasApiResult<Json<TokenResponse>> {
     let username = auth.username();
     let given_password = auth.password();
-
-    println!("Got auth request for '{}'", username);
     let user_vec = db::auth_info_by_username(&*pool, &username)?;
 
     if user_vec.len() == 1 {
@@ -45,7 +43,6 @@ crate fn auth(
             let _ = token_response.set_refresh_token(if let Some(refresh_tok) = refresh_tok_opt {
                 refresh_tok.clone()
             } else {
-                println!("Creating new refresh token for user '{}'", username);
                 // create a new refresh token and store it
                 let now = Utc::now().timestamp();
                 let mut claims = Claims::default();
@@ -63,7 +60,6 @@ crate fn auth(
                 let secret = env::var("JWT_SECRET")?;
                 let token = jsonwebtoken::encode(&header, &claims, secret.as_bytes())?;
 
-                println!("Storing refresh token in user profile");
                 db::add_refresh_token_to_profile(&*pool, &profile_id, &token)?;
                 token
             });
