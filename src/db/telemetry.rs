@@ -78,15 +78,17 @@ where
     match conn.prepare(*INSERT_HEADERS) {
         Ok(mut stmt) => {
             for header in headers {
+                println!("Inserting header into mozias_telemetry_headers");
                 let result = stmt.execute(params! {
                     "telemetry_id" => last_insert_id,
                     "key" => header.name(),
                     "value" => header.value(),
                 })?;
 
-                if result.affected_rows() != 1 {
-                    return Err(MoziasApiErrKind::InsertFailed.into());
-                }
+                println!("Affected Rows: {}", result.affected_rows());
+                // if result.affected_rows() != 1 {
+                //     return Err(MoziasApiErrKind::InsertFailed.into());
+                // }
             }
             Ok(())
         }
