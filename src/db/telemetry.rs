@@ -11,7 +11,7 @@
 //! ```
 //! ```
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
-use crate::fairings::telemetry::Telemetry;
+use crate::fairings::telemetry::{DirectionType, Telemetry};
 use lazy_static::lazy_static;
 use mysql::params;
 use mysql::prelude::GenericConnection;
@@ -20,20 +20,20 @@ use rocket::http::{Cookie, Header};
 lazy_static! {
     static ref INSERT_TELEMETRY: &'static str = r#"
 INSERT INTO mozias_telemetry
-  (UUID, METHOD, URI, REMOTE, REAL_IP, ELAPSED)
+  (UUID, METHOD, URI, REMOTE, REAL_IP, STATUS, CONTENT_TYPE, ELAPSED)
 VALUES
-  (:uuid, :method, :uri, :remote, :real_ip, :elapsed)
+  (:uuid, :method, :uri, :remote, :real_ip, :status, :content_type, :elapsed)
 "#;
     static ref INSERT_HEADERS: &'static str = r#"
 INSERT INTO mozias_telemetry_headers
-  (`telemetry_id`, `key`, `value`)
+  (`telemetry_id`, `header_type`, `key`, `value`)
 VALUES
-  (:telemetry_id, :key, :value)"#;
+  (:telemetry_id, :header_type, :key, :value)"#;
     static ref INSERT_COOKIES: &'static str = r#"
 INSERT INTO mozias_telemetry_cookies
-  (`telemetry_id`, `key`, `value`)
+  (`telemetry_id`, `cookie_type`, `key`, `value`)
 VALUES
-  (:telemetry_id, :key, :value)"#;
+  (:telemetry_id, :cookie_type, :key, :value)"#;
 }
 
 crate fn insert_telemetry<T>(
@@ -52,6 +52,8 @@ where
                 "uri" => telemetry.uri(),
                 "remote" => telemetry.remote(),
                 "real_ip" => telemetry.real_ip(),
+                "status" => telemetry.status(),
+                "content_type" => telemetry.content_type(),
                 "elapsed" => elapsed,
             })?;
 
@@ -70,6 +72,7 @@ where
 crate fn insert_headers<T>(
     conn: &mut T,
     last_insert_id: u64,
+    header_type: DirectionType,
     headers: &[Header<'_>],
 ) -> MoziasApiResult<()>
 where
@@ -80,6 +83,7 @@ where
             for header in headers {
                 let result = stmt.execute(params! {
                     "telemetry_id" => last_insert_id,
+                    "header_type" => header_type.to_string(),
                     "key" => header.name(),
                     "value" => header.value(),
                 })?;
@@ -100,6 +104,7 @@ where
 crate fn insert_cookies<T>(
     conn: &mut T,
     last_insert_id: u64,
+    cookie_type: DirectionType,
     cookies: &[Cookie<'_>],
 ) -> MoziasApiResult<()>
 where
@@ -110,6 +115,7 @@ where
             for cookie in cookies {
                 let result = stmt.execute(params! {
                     "telemetry_id" => last_insert_id,
+                    "cookie_type" => cookie_type.to_string(),
                     "key" => cookie.name(),
                     "value" => cookie.value(),
                 })?;
