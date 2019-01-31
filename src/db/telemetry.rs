@@ -14,7 +14,7 @@ use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use lazy_static::lazy_static;
 use mysql::params;
 use mysql::prelude::GenericConnection;
-use rocket::http::Header;
+use rocket::http::{Cookie, Header};
 
 lazy_static! {
     static ref INSERT_TELEMETRY: &'static str = r#"
@@ -25,6 +25,11 @@ VALUES
 "#;
     static ref INSERT_HEADERS: &'static str = r#"
 INSERT INTO mozias_telemetry_headers
+  (`telemetry_id`, `key`, `value`)
+VALUES
+  (:telemetry_id, :key, :value)"#;
+    static ref INSERT_COOKIES: &'static str = r#"
+INSERT INTO mozias_telemetry_cookies
   (`telemetry_id`, `key`, `value`)
 VALUES
   (:telemetry_id, :key, :value)"#;
@@ -80,6 +85,36 @@ where
                     "telemetry_id" => last_insert_id,
                     "key" => header.name(),
                     "value" => header.value(),
+                })?;
+
+                if result.affected_rows() != 1 {
+                    return Err(MoziasApiErrKind::InsertFailed.into());
+                }
+            }
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("{}", e);
+            Err(e.into())
+        }
+    }
+}
+
+crate fn insert_cookies<T>(
+    conn: &mut T,
+    last_insert_id: u64,
+    cookies: &[Cookie<'_>],
+) -> MoziasApiResult<()>
+where
+    T: GenericConnection,
+{
+    match conn.prepare(*INSERT_HEADERS) {
+        Ok(mut stmt) => {
+            for cookie in cookies {
+                let result = stmt.execute(params! {
+                    "telemetry_id" => last_insert_id,
+                    "key" => cookie.name(),
+                    "value" => cookie.value(),
                 })?;
 
                 if result.affected_rows() != 1 {

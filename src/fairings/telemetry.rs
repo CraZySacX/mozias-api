@@ -13,7 +13,7 @@
 use crate::db;
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
 use rocket::fairing::{Fairing, Info, Kind};
-use rocket::http::Header;
+use rocket::http::{Cookie, Header};
 use rocket::{Data, Request, Response};
 use std::time::Instant;
 use uuid::Uuid;
@@ -46,6 +46,7 @@ impl Telemetry {
         let remote = req.remote().map(|r| r.to_string());
         let real_ip = req.real_ip().map(|r| r.to_string());
         let headers: Vec<Header<'_>> = req.headers().iter().map(|h| h).collect();
+        let cookies: Vec<Cookie<'_>> = req.cookies().iter().cloned().collect();
 
         let telemetry = req.local_cache(|| Self { start: None });
 
@@ -56,13 +57,15 @@ impl Telemetry {
         };
 
         let mut txn = db::start_txn()?;
-        let last_insert_id = db::telemetry::insert_telemetry(
+
+        match db::telemetry::insert_telemetry(
             &mut txn, &uuid_str, &method, &uri, &remote, &real_ip, elapsed,
-        )?;
-        match db::telemetry::insert_headers(&mut txn, last_insert_id, &headers) {
-            Ok(_) => {
-                txn.commit()?;
-            }
+        )
+        .and_then(|last_insert_id| {
+            db::telemetry::insert_headers(&mut txn, last_insert_id, &headers)
+                .and_then(|_| db::telemetry::insert_cookies(&mut txn, last_insert_id, &cookies))
+        }) {
+            Ok(_) => txn.commit()?,
             Err(e) => {
                 eprintln!("{}", e);
                 txn.rollback()?;
