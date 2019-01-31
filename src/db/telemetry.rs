@@ -11,6 +11,7 @@
 //! ```
 //! ```
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
+use crate::fairings::telemetry::Telemetry;
 use lazy_static::lazy_static;
 use mysql::params;
 use mysql::prelude::GenericConnection;
@@ -37,11 +38,7 @@ VALUES
 
 crate fn insert_telemetry<T>(
     conn: &mut T,
-    uuid: &str,
-    method: &str,
-    uri: &str,
-    remote: &Option<String>,
-    real_ip: &Option<String>,
+    telemetry: &Telemetry,
     elapsed: u64,
 ) -> MoziasApiResult<u64>
 where
@@ -50,11 +47,11 @@ where
     match conn.prepare(*INSERT_TELEMETRY) {
         Ok(mut stmt) => {
             let result = stmt.execute(params! {
-                "uuid" => uuid,
-                "method" => method,
-                "uri" => uri,
-                "remote" => remote,
-                "real_ip" => real_ip,
+                "uuid" => telemetry.uuid(),
+                "method" => telemetry.method(),
+                "uri" => telemetry.uri(),
+                "remote" => telemetry.remote(),
+                "real_ip" => telemetry.real_ip(),
                 "elapsed" => elapsed,
             })?;
 

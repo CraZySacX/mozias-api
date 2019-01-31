@@ -12,6 +12,7 @@
 //! ```
 use crate::db;
 use crate::error::{MoziasApiErrKind, MoziasApiResult};
+use getset::{Getters, Setters};
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::http::{Cookie, Header};
 use rocket::{Data, Request, Response};
@@ -20,15 +21,34 @@ use uuid::Uuid;
 
 const MOZIAS_UUID_HEADER: &str = "x-request-id";
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Getters, Setters)]
 crate struct Telemetry {
+    #[get = "crate"]
+    #[set]
     start: Option<Instant>,
+    #[get = "crate"]
+    #[set]
+    uuid: String,
+    #[get = "crate"]
+    #[set]
+    method: String,
+    #[get = "crate"]
+    #[set]
+    uri: String,
+    #[get = "crate"]
+    #[set]
+    remote: Option<String>,
+    #[get = "crate"]
+    #[set]
+    real_ip: Option<String>,
 }
 
 impl Telemetry {
     fn request(&self, req: &mut Request<'_>, _: &Data) -> MoziasApiResult<()> {
         let now = Instant::now();
-        let _ = req.local_cache(|| Self { start: Some(now) });
+        let mut telemetry = Self::default();
+        telemetry.start = Some(now);
+        let _ = req.local_cache(|| telemetry);
         Ok(())
     }
 
@@ -42,13 +62,21 @@ impl Telemetry {
 
         // Pull data off request
         let method = req.method().to_string();
-        let uri = req.uri().path();
+        let uri = req.uri().path().to_string();
         let remote = req.remote().map(|r| r.to_string());
         let real_ip = req.real_ip().map(|r| r.to_string());
         let headers: Vec<Header<'_>> = req.headers().iter().map(|h| h).collect();
         let cookies: Vec<Cookie<'_>> = req.cookies().iter().cloned().collect();
 
-        let telemetry = req.local_cache(|| Self { start: None });
+        // Grab the request local telemetry and enhance with info for persistence
+        let orig_telemetry = req.local_cache(Self::default);
+
+        let mut telemetry = orig_telemetry.clone();
+        let _ = telemetry.set_uuid(uuid_str);
+        let _ = telemetry.set_method(method);
+        let _ = telemetry.set_uri(uri);
+        let _ = telemetry.set_remote(remote);
+        let _ = telemetry.set_real_ip(real_ip);
 
         let elapsed = if let Some(duration) = telemetry.start.map(|st| st.elapsed()) {
             duration.as_secs() * 1000 + u64::from(duration.subsec_millis())
@@ -58,13 +86,12 @@ impl Telemetry {
 
         let mut txn = db::start_txn()?;
 
-        match db::telemetry::insert_telemetry(
-            &mut txn, &uuid_str, &method, &uri, &remote, &real_ip, elapsed,
-        )
-        .and_then(|last_insert_id| {
-            db::telemetry::insert_headers(&mut txn, last_insert_id, &headers)
-                .and_then(|_| db::telemetry::insert_cookies(&mut txn, last_insert_id, &cookies))
-        }) {
+        match db::telemetry::insert_telemetry(&mut txn, &telemetry, elapsed).and_then(
+            |last_insert_id| {
+                db::telemetry::insert_headers(&mut txn, last_insert_id, &headers)
+                    .and_then(|_| db::telemetry::insert_cookies(&mut txn, last_insert_id, &cookies))
+            },
+        ) {
             Ok(_) => txn.commit()?,
             Err(e) => {
                 eprintln!("{}", e);
