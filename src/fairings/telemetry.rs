@@ -177,7 +177,7 @@ impl Fairing for Telemetry {
         let _ = self.request(req, data);
     }
 
-    fn on_response(&self, req: &Request<'_>, res: &mut Response<'_>) {
-        let _ = self.response(req, res);
+    fn on_response(&self, request: &Request<'_>, response: &mut Response<'_>) {
+        let _ = self.response(request, response);
     }
 }

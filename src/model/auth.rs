@@ -169,7 +169,7 @@ impl Default for Claims {
             sub: String::new(),
             iat: now,
             nbf: now,
-            exp: exp,
+            exp,
             aid: String::new(),
             tfa: false,
             // rol: Vec::new(),
