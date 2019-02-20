@@ -110,7 +110,7 @@ crate fn insert_cookies<T>(
 where
     T: GenericConnection,
 {
-    match conn.prepare(*INSERT_HEADERS) {
+    match conn.prepare(*INSERT_COOKIES) {
         Ok(mut stmt) => {
             for cookie in cookies {
                 let result = stmt.execute(params! {
