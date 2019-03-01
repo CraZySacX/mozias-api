@@ -10,7 +10,7 @@
 //!
 //! ```
 //! ```
-#![feature(crate_visibility_modifier, decl_macro, proc_macro_hygiene, try_from)]
+#![feature(crate_visibility_modifier, decl_macro, proc_macro_hygiene)]
 #![deny(
     absolute_paths_not_starting_with_crate,
     anonymous_parameters,
