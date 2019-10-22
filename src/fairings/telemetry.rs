@@ -34,8 +34,8 @@ impl fmt::Display for DirectionType {
             f,
             "{}",
             match self {
-                DirectionType::Request => "REQ",
-                DirectionType::Response => "RESPONSE",
+                Self::Request => "REQ",
+                Self::Response => "RESPONSE",
             }
         )
     }
@@ -70,7 +70,7 @@ crate struct Telemetry {
 }
 
 impl Telemetry {
-    fn request(&self, req: &mut Request<'_>, _: &Data) -> MoziasApiResult<()> {
+    fn request(req: &mut Request<'_>, _: &Data) -> MoziasApiResult<()> {
         let now = Instant::now();
         let mut telemetry = Self::default();
         telemetry.start = Some(now);
@@ -78,7 +78,7 @@ impl Telemetry {
         Ok(())
     }
 
-    fn response(&self, req: &Request<'_>, resp: &mut Response<'_>) -> MoziasApiResult<()> {
+    fn response(req: &Request<'_>, resp: &mut Response<'_>) -> MoziasApiResult<()> {
         let uuid_header = req
             .headers()
             .get_one(MOZIAS_UUID_HEADER)
@@ -174,10 +174,10 @@ impl Fairing for Telemetry {
     }
 
     fn on_request(&self, req: &mut Request<'_>, data: &Data) {
-        let _ = self.request(req, data);
+        let _ = Self::request(req, data);
     }
 
     fn on_response(&self, request: &Request<'_>, response: &mut Response<'_>) {
-        let _ = self.response(request, response);
+        let _ = Self::response(request, response);
     }
 }

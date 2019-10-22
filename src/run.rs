@@ -18,7 +18,7 @@ use rocket::routes;
 use rocket_contrib::serve::StaticFiles;
 
 crate fn run() -> MoziasApiResult<()> {
-    let pool = db::get_pool()?.clone();
+    let pool = db::get_pool()?;
     Err(rocket::ignite()
         .manage(pool)
         .attach(Telemetry::default())

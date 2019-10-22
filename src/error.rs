@@ -110,7 +110,7 @@ external_error!(jsonwebtoken::errors::Error, MoziasApiErrKind::JsonWebToken);
 external_error!(rocket::error::LaunchError, MoziasApiErrKind::Launch);
 external_error!(mysql::Error, MoziasApiErrKind::Mysql);
 external_error!(String, MoziasApiErrKind::Str);
-external_error!(uuid::parser::ParseError, MoziasApiErrKind::UuidParse);
+external_error!(uuid::Error, MoziasApiErrKind::UuidParse);
 external_error!(std::env::VarError, MoziasApiErrKind::Var);
 
 #[derive(Debug)]
@@ -128,38 +128,38 @@ crate enum MoziasApiErrKind {
     NoInsertId,
     Str(String),
     Unauthorized,
-    UuidParse(uuid::parser::ParseError),
+    UuidParse(uuid::Error),
     Var(std::env::VarError),
 }
 
 impl Error for MoziasApiErrKind {
     fn description(&self) -> &str {
         match self {
-            MoziasApiErrKind::Argon2(inner) => inner.description(),
-            MoziasApiErrKind::Clap(inner) => inner.description(),
-            MoziasApiErrKind::Header => "invalid header",
-            MoziasApiErrKind::InsertFailed => "insert failed",
-            MoziasApiErrKind::Io(inner) => inner.description(),
-            MoziasApiErrKind::JsonWebToken(inner) => inner.description(),
-            MoziasApiErrKind::Launch(inner) => inner.description(),
-            MoziasApiErrKind::Mysql(inner) => inner.description(),
-            MoziasApiErrKind::NoInsertId => "no insert id found",
-            MoziasApiErrKind::Str(inner) => &inner[..],
-            MoziasApiErrKind::Unauthorized => "unauthorized",
-            MoziasApiErrKind::UuidParse(inner) => inner.description(),
-            MoziasApiErrKind::Var(inner) => inner.description(),
+            Self::Argon2(inner) => inner.description(),
+            Self::Clap(inner) => inner.description(),
+            Self::Header => "invalid header",
+            Self::InsertFailed => "insert failed",
+            Self::Io(inner) => inner.description(),
+            Self::JsonWebToken(inner) => inner.description(),
+            Self::Launch(inner) => inner.description(),
+            Self::Mysql(inner) => inner.description(),
+            Self::NoInsertId => "no insert id found",
+            Self::Str(inner) => &inner[..],
+            Self::Unauthorized => "unauthorized",
+            Self::UuidParse(inner) => inner.description(),
+            Self::Var(inner) => inner.description(),
         }
     }
 
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
-            MoziasApiErrKind::Argon2(inner) => inner.source(),
-            MoziasApiErrKind::Clap(inner) => inner.source(),
-            MoziasApiErrKind::Io(inner) => inner.source(),
-            MoziasApiErrKind::Launch(inner) => inner.source(),
-            MoziasApiErrKind::Mysql(inner) => inner.source(),
-            MoziasApiErrKind::UuidParse(inner) => inner.source(),
-            MoziasApiErrKind::Var(inner) => inner.source(),
+            Self::Argon2(inner) => inner.source(),
+            Self::Clap(inner) => inner.source(),
+            Self::Io(inner) => inner.source(),
+            Self::Launch(inner) => inner.source(),
+            Self::Mysql(inner) => inner.source(),
+            Self::UuidParse(inner) => inner.source(),
+            Self::Var(inner) => inner.source(),
             _ => None,
         }
     }
@@ -169,13 +169,13 @@ impl fmt::Display for MoziasApiErrKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.description())?;
         match self {
-            MoziasApiErrKind::Argon2(inner) => write!(f, ": {}", inner),
-            MoziasApiErrKind::Clap(inner) => write!(f, ": {}", inner),
-            MoziasApiErrKind::Io(inner) => write!(f, ": {}", inner),
-            MoziasApiErrKind::Launch(inner) => write!(f, ": {}", inner),
-            MoziasApiErrKind::Mysql(inner) => write!(f, ": {}", inner),
-            MoziasApiErrKind::UuidParse(inner) => write!(f, ": {}", inner),
-            MoziasApiErrKind::Var(inner) => write!(f, ": {}", inner),
+            Self::Argon2(inner) => write!(f, ": {}", inner),
+            Self::Clap(inner) => write!(f, ": {}", inner),
+            Self::Io(inner) => write!(f, ": {}", inner),
+            Self::Launch(inner) => write!(f, ": {}", inner),
+            Self::Mysql(inner) => write!(f, ": {}", inner),
+            Self::UuidParse(inner) => write!(f, ": {}", inner),
+            Self::Var(inner) => write!(f, ": {}", inner),
             _ => write!(f, ""),
         }
     }
